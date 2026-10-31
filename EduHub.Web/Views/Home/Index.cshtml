@@ -1,8 +1,155 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Student Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container-fluid py-4 px-4">
+    <div class="row g-4">
+        
+        <!-- 1. القائمة الجانبية (Sidebar) -->
+        <aside class="col-xl-2 col-lg-3">
+            <div class="card-custom p-3 d-flex flex-column" style="min-height: 90vh;">
+                <!-- Logo -->
+                <div class="d-flex align-items-center gap-2 mb-4 px-2">
+                    <div class="bg-purple text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </div>
+                    <span class="fs-5 fw-bold text-dark">EduHub</span>
+                </div>
+
+                <!-- Navigation Links -->
+                <div class="d-flex flex-column gap-1 mb-auto">
+                    <small class="text-uppercase text-muted fw-bold px-2 mb-2" style="font-size: 0.7rem;">Overview</small>
+                    <a href="#" class="sidebar-link active"><i class="bi bi-grid-fill"></i> Dashboard</a>
+                    <a href="#" class="sidebar-link"><i class="bi bi-play-circle-fill"></i> My Courses</a>
+                    <a href="#" class="sidebar-link"><i class="bi bi-check2-square"></i> Tasks</a>
+                    <a href="#" class="sidebar-link"><i class="bi bi-people-fill"></i> Mentors</a>
+                    
+                    <small class="text-uppercase text-muted fw-bold px-2 mt-4 mb-2" style="font-size: 0.7rem;">Settings</small>
+                    <a href="#" class="sidebar-link"><i class="bi bi-gear-fill"></i> Settings</a>
+                    <a href="#" class="sidebar-link text-danger"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 2. محتوى لوحة التحكم الرئيسي (Center Content) -->
+        <main class="col-xl-7 col-lg-6">
+            <!-- Search & Filter Bar -->
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div class="position-relative w-50">
+                    <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                    <input type="text" class="form-control rounded-pill ps-5 py-2 border-0 shadow-sm" placeholder="Search your course..." />
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-white card-custom rounded-circle p-2 px-3"><i class="bi bi-bell"></i></button>
+                </div>
+            </div>
+
+            <!-- Purple Hero Banner -->
+            <div class="card border-0 text-white p-4 mb-4 rounded-4 position-relative overflow-hidden" 
+                 style="background: linear-gradient(135deg, #6342e8 0%, #8562f7 100%);">
+                <div class="position-relative" style="z-index: 2; max-width: 65%;">
+                    <span class="badge bg-white text-purple fw-bold mb-3 px-3 py-2 rounded-pill">ONLINE COURSE</span>
+                    <h2 class="fw-bold mb-3">Sharpen Your Skills With Professional Online Courses</h2>
+                    <button class="btn btn-dark rounded-pill px-4 py-2 fw-semibold">Join Now</button>
+                </div>
+                <div class="position-absolute end-0 bottom-0 opacity-25 me-3 mb-2" style="font-size: 7rem; z-index: 1;">
+                    <i class="bi bi-stars"></i>
+                </div>
+            </div>
+
+            <!-- Continue Watching Section -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0">Continue Watching</h5>
+                <a href="#" class="text-purple fw-bold text-decoration-none small">See All</a>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <!-- Course Card 1 -->
+                <div class="col-md-6">
+                    <div class="card-custom p-3 h-100">
+                        <div class="rounded-3 mb-3 bg-secondary" style="height: 120px; background: url('https://picsum.photos/400/200?random=1') center/cover;"></div>
+                        <span class="text-muted small">Frontend Development</span>
+                        <h6 class="fw-bold mt-1">Beginner's Guide To Modern Frontend & React</h6>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="small text-purple fw-bold">12/18 Lessons</span>
+                            <div class="progress w-50" style="height: 6px;">
+                                <div class="progress-bar bg-purple rounded-pill" style="width: 65%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Card 2 -->
+                <div class="col-md-6">
+                    <div class="card-custom p-3 h-100">
+                        <div class="rounded-3 mb-3 bg-secondary" style="height: 120px; background: url('https://picsum.photos/400/200?random=2') center/cover;"></div>
+                        <span class="text-muted small">Backend & API</span>
+                        <h6 class="fw-bold mt-1">Enterprise Architecture With .NET 8 & Web API</h6>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="small text-purple fw-bold">4/24 Lessons</span>
+                            <div class="progress w-50" style="height: 6px;">
+                                <div class="progress-bar bg-purple rounded-pill" style="width: 25%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 3. الشريط الجانبي الأيمن للبروفايل والإحصائيات (Right Sidebar) -->
+        <aside class="col-xl-3 col-lg-3">
+            <div class="card-custom p-4">
+                <!-- Profile Header -->
+                <div class="text-center mb-4">
+                    <div class="position-relative d-inline-block">
+                        <img src="https://ui-avatars.com/api/?name=Mohamed+Mahmoud&background=6342e8&color=fff&size=128" 
+                             class="rounded-circle mb-2 border border-3 border-purple p-1" style="width: 75px; height: 75px;" alt="Avatar" />
+                    </div>
+                    <h6 class="fw-bold mb-0">Mohamed Mahmoud</h6>
+                    <small class="text-muted">Computers & Information Student</small>
+                </div>
+
+                <!-- Learning Hours Chart Mockup -->
+                <h6 class="fw-bold mb-3">Study Activity</h6>
+                <div class="d-flex align-items-end justify-content-between bg-light p-3 rounded-4 mb-4" style="height: 130px;">
+                    <div class="d-flex flex-column align-items-center gap-1">
+                        <div class="bg-purple-subtle rounded-pill" style="width: 14px; height: 45px;"></div>
+                        <span style="font-size: 0.65rem;" class="text-muted">M</span>
+                    </div>
+                    <div class="d-flex flex-column align-items-center gap-1">
+                        <div class="bg-purple-subtle rounded-pill" style="width: 14px; height: 70px;"></div>
+                        <span style="font-size: 0.65rem;" class="text-muted">T</span>
+                    </div>
+                    <div class="d-flex flex-column align-items-center gap-1">
+                        <div class="bg-purple rounded-pill" style="width: 14px; height: 95px;"></div>
+                        <span style="font-size: 0.65rem;" class="text-purple fw-bold">W</span>
+                    </div>
+                    <div class="d-flex flex-column align-items-center gap-1">
+                        <div class="bg-purple-subtle rounded-pill" style="width: 14px; height: 35px;"></div>
+                        <span style="font-size: 0.65rem;" class="text-muted">T</span>
+                    </div>
+                    <div class="d-flex flex-column align-items-center gap-1">
+                        <div class="bg-purple rounded-pill" style="width: 14px; height: 85px;"></div>
+                        <span style="font-size: 0.65rem;" class="text-purple fw-bold">F</span>
+                    </div>
+                </div>
+
+                <!-- Your Mentors -->
+                <h6 class="fw-bold mb-3">Your Mentors</h6>
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="https://ui-avatars.com/api/?name=Dr+Ahmed&background=random" class="rounded-circle" style="width: 32px; height: 32px;" />
+                            <div>
+                                <p class="mb-0 fw-semibold small">Dr. Ahmed</p>
+                                <span class="text-muted" style="font-size: 0.7rem;">Senior .NET Arch</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm bg-purple-subtle text-purple rounded-pill px-3 py-1 fw-bold" style="font-size: 0.7rem;">Chat</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+    </div>
 </div>
