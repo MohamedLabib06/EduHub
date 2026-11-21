@@ -1,52 +1,123 @@
-<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EduHub - Dashboard</title>
-    <!-- Bootstrap 5 CSS & Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"] - EduHub</title>
 
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #f7f8fc;
-            color: #2b2f38;
-        }
-        .bg-purple { background-color: #6342e8 !important; }
-        .text-purple { color: #6342e8 !important; }
-        .bg-purple-subtle { background-color: #f1edfe !important; }
-        .border-purple { border-color: #6342e8 !important; }
-        .rounded-4 { border-radius: 1.25rem !important; }
-        .sidebar-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 16px;
-            color: #6c757d;
-            font-weight: 600;
-            text-decoration: none;
-            border-radius: 12px;
-            transition: all 0.2s ease;
-        }
-        .sidebar-link:hover, .sidebar-link.active {
-            background-color: #f1edfe;
-            color: #6342e8;
-        }
-        .card-custom {
-            border: none;
-            border-radius: 1.25rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-            background: #ffffff;
-        }
-    </style>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans&display=swap" rel="stylesheet">
+
+    <!-- CSS Files -->
+    <link href="~/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/css/bootstrap-icons.css" rel="stylesheet" />
+    <link href="~/css/templatemo-topic-listing.css" rel="stylesheet" />
 </head>
-<body>
-    @RenderBody()
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<body id="top">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                <i class="bi-back"></i>
+                <span>EduHub</span>
+            </a>
+
+            <div class="d-lg-none ms-auto me-4">
+                <a href="#top" class="navbar-icon bi-person smoothscroll"></a>
+            </div>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-lg-5 me-lg-auto">
+                    <li class="nav-item">
+                        <a class="nav-link click-scroll" href="/#section_1">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link click-scroll" href="/#section_2">Browse Topics</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link click-scroll" href="/#section_3">How it works</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link click-scroll" href="/#section_4">FAQs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link click-scroll" href="/#section_5">Contact</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarLightDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">Pages</a>
+                        <ul class="dropdown-menu dropdown-menu-light" aria-labelledby="navbarLightDropdownMenuLink">
+                            <li><a class="dropdown-item" href="#">Courses Listing</a></li>
+                            <li><a class="dropdown-item" href="#">Contact Form</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="d-none d-lg-block">
+                    <a href="#top" class="navbar-icon bi-person smoothscroll"></a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-12 mb-4 pb-2">
+                    <a class="navbar-brand mb-2" asp-controller="Home" asp-action="Index">
+                        <i class="bi-back"></i>
+                        <span>EduHub</span>
+                    </a>
+                </div>
+
+                <div class="col-lg-3 col-md-4 col-6">
+                    <h6 class="site-footer-title mb-3">Resources</h6>
+                    <ul class="site-footer-links">
+                        <li class="site-footer-link-item"><a href="/#section_1" class="site-footer-link">Home</a></li>
+                        <li class="site-footer-link-item"><a href="/#section_3" class="site-footer-link">How it works</a></li>
+                        <li class="site-footer-link-item"><a href="/#section_4" class="site-footer-link">FAQs</a></li>
+                        <li class="site-footer-link-item"><a href="/#section_5" class="site-footer-link">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-4 col-6 mb-4 mb-lg-0">
+                    <h6 class="site-footer-title mb-3">Information</h6>
+                    <p class="text-white d-flex mb-1">
+                        <a href="tel:305-240-9671" class="site-footer-link">305-240-9671</a>
+                    </p>
+                    <p class="text-white d-flex">
+                        <a href="mailto:info@eduhub.com" class="site-footer-link">info@eduhub.com</a>
+                    </p>
+                </div>
+
+                <div class="col-lg-3 col-md-4 col-12 mt-4 mt-lg-0 ms-auto">
+                    <p class="copyright-text mt-lg-5 mt-4">
+                        Copyright © 2026 EduHub Learning Platform. All rights reserved.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT FILES -->
+    <script src="~/js/jquery.min.js"></script>
+    <script src="~/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/jquery.sticky.js"></script>
+    <script src="~/js/click-scroll.js"></script>
+    <script src="~/js/custom.js"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
