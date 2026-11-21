@@ -1,17 +1,24 @@
-﻿@{
-    ViewData["Title"] = "Discover & Learn";
+﻿@model IEnumerable<EduHub.Data.Entities.Course>
+@{
+    ViewData["Title"] = "Home";
+    var categories = ViewBag.Categories as IEnumerable<EduHub.Data.Entities.Category> ?? Enumerable.Empty<EduHub.Data.Entities.Category>();
+    var featuredCourses = Model.Take(2).ToList();
 }
 
+<!-- Hero Section + Live Search -->
 <section class="hero-section d-flex justify-content-center align-items-center" id="section_1">
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-12 mx-auto">
                 <h1 class="text-white text-center">Discover. Learn. Enjoy</h1>
-                <h6 class="text-center">Platform for Creatives and Engineers</h6>
-                <form method="get" class="custom-form mt-4 pt-2 mb-lg-0 mb-5" role="search">
+                <h6 class="text-center">platform for creatives around the world</h6>
+
+                <form asp-controller="Home" asp-action="Index" method="get" class="custom-form mt-4 pt-2 mb-lg-0 mb-5" role="search">
                     <div class="input-group input-group-lg">
                         <span class="input-group-text bi-search" id="basic-addon1"></span>
-                        <input name="keyword" type="search" class="form-control" id="keyword" placeholder="Design, Code, Marketing, Finance..." aria-label="Search">
+                        <input name="keyword" type="search" class="form-control" id="keyword"
+                               value="@ViewBag.SearchKeyword"
+                               placeholder="Web Design, Backend, Marketing, Finance ..." aria-label="Search">
                         <button type="submit" class="form-control">Search</button>
                     </div>
                 </form>
@@ -20,44 +27,56 @@
     </div>
 </section>
 
+<!-- Featured Section (Top 2 Courses from Database) -->
 <section class="featured-section">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-4 col-12 mb-4 mb-lg-0">
-                <div class="custom-block bg-white shadow-lg">
-                    <a href="#">
-                        <div class="d-flex">
-                            <div>
-                                <h5 class="mb-2">Web Design</h5>
-                                <p class="mb-0">Explore modern front-end engineering and UI architecture.</p>
+            @if (featuredCourses.Any())
+            {
+                var firstCourse = featuredCourses[0];
+                <div class="col-lg-4 col-12 mb-4 mb-lg-0">
+                    <div class="custom-block bg-white shadow-lg">
+                        <a asp-controller="Courses" asp-action="Details" asp-route-id="@firstCourse.Id">
+                            <div class="d-flex">
+                                <div>
+                                    <h5 class="mb-2">@firstCourse.Title</h5>
+                                    <p class="mb-0">By @firstCourse.Instructor.User.FirstName @firstCourse.Instructor.User.LastName • @firstCourse.Level</p>
+                                </div>
+                                <span class="badge bg-design rounded-pill ms-auto">$@firstCourse.Price</span>
                             </div>
-                            <span class="badge bg-design rounded-pill ms-auto">14</span>
-                        </div>
-                        <img src="https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=600&auto=format&fit=crop&q=80" class="custom-block-image img-fluid" alt="Web Design">
-                    </a>
-                </div>
-            </div>
-
-            <div class="col-lg-6 col-12">
-                <div class="custom-block custom-block-overlay">
-                    <div class="d-flex flex-column h-100">
-                        <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&auto=format&fit=crop&q=80" class="custom-block-image img-fluid" alt="Finance">
-                        <div class="custom-block-overlay-text d-flex">
-                            <div>
-                                <h5 class="text-white mb-2">Full Stack .NET & Cloud</h5>
-                                <p class="text-white">Learn to build scalable enterprise web solutions with ASP.NET Core.</p>
-                                <a href="#" class="btn custom-btn mt-2 mt-lg-3">Explore Track</a>
-                            </div>
-                            <span class="badge bg-finance rounded-pill ms-auto">25</span>
-                        </div>
-                        <div class="section-overlay"></div>
+                            <img src="~/images/topics/undraw_Remote_design_team_re_urdx.png" class="custom-block-image img-fluid" alt="@firstCourse.Title">
+                        </a>
                     </div>
                 </div>
-            </div>
+            }
+
+            @if (featuredCourses.Count > 1)
+            {
+                var secondCourse = featuredCourses[1];
+                <div class="col-lg-6 col-12">
+                    <div class="custom-block custom-block-overlay">
+                        <div class="d-flex flex-column h-100">
+                            <img src="~/images/businesswoman-using-tablet-analysis.jpg" class="custom-block-image img-fluid" alt="@secondCourse.Title">
+
+                            <div class="custom-block-overlay-text d-flex">
+                                <div>
+                                    <h5 class="text-white mb-2">@secondCourse.Title</h5>
+                                    <p class="text-white">Category: @secondCourse.Category.Name | Rating: ⭐ @secondCourse.AverageRating</p>
+                                    <a asp-controller="Courses" asp-action="Details" asp-route-id="@secondCourse.Id" class="btn custom-btn mt-2 mt-lg-3">View Course</a>
+                                </div>
+                                <span class="badge bg-finance rounded-pill ms-auto">$@secondCourse.Price</span>
+                            </div>
+
+                            <div class="section-overlay"></div>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </section>
 
+<!-- Explore Section (Dynamic Categories & Courses from SQL Server) -->
 <section class="explore-section section-padding" id="section_2">
     <div class="container">
         <div class="row">
@@ -71,14 +90,14 @@
         <div class="row">
             <ul class="nav nav-tabs" id="myTab" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="design-tab" data-bs-toggle="tab" data-bs-target="#design-tab-pane" type="button" role="tab">Design</button>
+                    <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-tab-pane" type="button" role="tab">All Courses</button>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="marketing-tab" data-bs-toggle="tab" data-bs-target="#marketing-tab-pane" type="button" role="tab">Marketing</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="finance-tab" data-bs-toggle="tab" data-bs-target="#finance-tab-pane" type="button" role="tab">Finance</button>
-                </li>
+                @foreach (var cat in categories)
+                {
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="cat-@cat.Id-tab" data-bs-toggle="tab" data-bs-target="#cat-@cat.Id-pane" type="button" role="tab">@cat.Name</button>
+                    </li>
+                }
             </ul>
         </div>
     </div>
@@ -87,24 +106,74 @@
         <div class="row">
             <div class="col-12">
                 <div class="tab-content" id="myTabContent">
-                    <div class="tab-pane fade show active" id="design-tab-pane" role="tabpanel">
+                    <!-- Tab 1: All Courses -->
+                    <div class="tab-pane fade show active" id="all-tab-pane" role="tabpanel" tabindex="0">
                         <div class="row">
-                            <div class="col-lg-4 col-md-6 col-12 mb-4 mb-lg-0">
-                                <div class="custom-block bg-white shadow-lg">
-                                    <a href="#">
-                                        <div class="d-flex">
-                                            <div>
-                                                <h5 class="mb-2">Web Design</h5>
-                                                <p class="mb-0">Clean modern layouts and UI components.</p>
-                                            </div>
-                                            <span class="badge bg-design rounded-pill ms-auto">14</span>
-                                        </div>
-                                        <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=600&auto=format&fit=crop&q=80" class="custom-block-image img-fluid" alt="Web Design">
-                                    </a>
+                            @if (!Model.Any())
+                            {
+                                <div class="col-12 text-center py-5">
+                                    <h5>No courses matched your search.</h5>
+                                    <a asp-controller="Home" asp-action="Index" class="btn custom-btn mt-3">Reset Search</a>
                                 </div>
-                            </div>
+                            }
+                            else
+                            {
+                                @foreach (var course in Model)
+                                {
+                                    <div class="col-lg-4 col-md-6 col-12 mb-4">
+                                        <div class="custom-block bg-white shadow-lg">
+                                            <a asp-controller="Courses" asp-action="Details" asp-route-id="@course.Id">
+                                                <div class="d-flex">
+                                                    <div>
+                                                        <h5 class="mb-2">@course.Title</h5>
+                                                        <p class="mb-0">@course.Category.Name • @course.Level • ⭐ @course.AverageRating</p>
+                                                    </div>
+                                                    <span class="badge bg-design rounded-pill ms-auto">$@course.Price</span>
+                                                </div>
+                                                <img src="~/images/topics/undraw_Educator_re_ju47.png" class="custom-block-image img-fluid" alt="@course.Title">
+                                            </a>
+                                        </div>
+                                    </div>
+                                }
+                            }
                         </div>
                     </div>
+
+                    <!-- Dynamic Category Tabs -->
+                    @foreach (var cat in categories)
+                    {
+                        var catCourses = Model.Where(c => c.CategoryId == cat.Id).ToList();
+                        <div class="tab-pane fade" id="cat-@cat.Id-pane" role="tabpanel" tabindex="0">
+                            <div class="row">
+                                @if (!catCourses.Any())
+                                {
+                                    <div class="col-12 text-center py-4">
+                                        <p>No published courses in @cat.Name yet.</p>
+                                    </div>
+                                }
+                                else
+                                {
+                                    @foreach (var course in catCourses)
+                                    {
+                                        <div class="col-lg-4 col-md-6 col-12 mb-4">
+                                            <div class="custom-block bg-white shadow-lg">
+                                                <a asp-controller="Courses" asp-action="Details" asp-route-id="@course.Id">
+                                                    <div class="d-flex">
+                                                        <div>
+                                                            <h5 class="mb-2">@course.Title</h5>
+                                                            <p class="mb-0">By @course.Instructor.User.FirstName @course.Instructor.User.LastName • @course.Level</p>
+                                                        </div>
+                                                        <span class="badge bg-finance rounded-pill ms-auto">$@course.Price</span>
+                                                    </div>
+                                                    <img src="~/images/topics/undraw_Finance_re_gnv2.png" class="custom-block-image img-fluid" alt="@course.Title">
+                                                </a>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
                 </div>
             </div>
         </div>

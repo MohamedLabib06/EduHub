@@ -1,7 +1,10 @@
 using EduHub.Data.Context;
 using EduHub.Data.Entities;
+using EduHub.Data.Seed;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using EduHub.Services.Interfaces;
+using EduHub.Services.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +19,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddScoped<ICourseService, CourseService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -39,5 +42,5 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
-
+await DbSeeder.SeedAsync(app.Services);
 app.Run();
