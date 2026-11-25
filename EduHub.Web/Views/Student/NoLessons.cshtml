@@ -1,0 +1,17 @@
+@model EduHub.Data.Entities.Course
+@{
+    ViewData["Title"] = "No Lessons Available";
+}
+
+<div class="container py-5 text-center">
+    <div class="py-5">
+        <i class="bi-cone-striped display-1 text-warning mb-3"></i>
+        <h2 class="fw-bold">No Lessons Available Yet</h2>
+        <p class="text-muted mb-4">
+            The course <strong>@Model.Title</strong> has been enrolled, but the instructor hasn't uploaded lessons yet.
+        </p>
+        <a asp-action="MyCourses" class="btn btn-primary rounded-pill px-4">
+            Back to My Courses
+        </a>
+    </div>
+</div>
