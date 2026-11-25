@@ -1,0 +1,427 @@
+@model EduHub.Web.ViewModels.Student.WatchViewModel
+@{
+    ViewData["Title"] = $"Watch: {Model.CurrentLesson.Title} - {Model.Course.Title}";
+}
+
+<!-- Course Header Banner -->
+<div class="bg-dark text-white py-3 border-bottom">
+    <div class="container-fluid px-lg-5">
+        <div class="row align-items-center">
+            <div class="col-lg-8 col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1">
+                        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-white-50">Home</a></li>
+                        <li class="breadcrumb-item"><a asp-controller="Student" asp-action="MyCourses" class="text-white-50">My Courses</a></li>
+                        <li class="breadcrumb-item active text-white" aria-current="page">@Model.Course.Title</li>
+                    </ol>
+                </nav>
+                <h4 class="mb-0 text-white fw-bold">@Model.Course.Title</h4>
+            </div>
+            <div class="col-lg-4 col-12 text-lg-end mt-2 mt-lg-0">
+                <span class="badge bg-secondary rounded-pill me-2 px-3 py-2">
+                    <i class="bi-tag me-1"></i> @Model.Course.Category.Name
+                </span>
+                <span class="badge bg-info text-white rounded-pill px-3 py-2">
+                    <i class="bi-bar-chart me-1"></i> @Model.Course.Level
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Learning Container -->
+<div class="container-fluid px-lg-5 py-4">
+    <!-- Notifications -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-3 mb-4" role="alert">
+            <i class="bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-3 mb-4" role="alert">
+            <i class="bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Certificate Banner if 100% completed -->
+    @if (!string.IsNullOrEmpty(Model.CertificateCode))
+    {
+        <div class="card border-0 shadow-sm rounded-4 mb-4 text-white" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+            <div class="card-body p-4 d-flex flex-column flex-md-row align-items-center justify-content-between">
+                <div class="d-flex align-items-center mb-3 mb-md-0">
+                    <div class="fs-1 text-warning me-3">
+                        <i class="bi-award-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1">Congratulations! You have completed this course!</h5>
+                        <p class="mb-0 text-white-50">
+                            Your official verification certificate code is:
+                            <span class="badge bg-dark text-warning fs-6 px-3 py-1 ms-1">@Model.CertificateCode</span>
+                        </p>
+                    </div>
+                </div>
+                <a href="#reviews-section" class="btn btn-light rounded-pill px-4 fw-bold">
+                    <i class="bi-star-fill text-warning me-1"></i> Leave a Review
+                </a>
+            </div>
+        </div>
+    }
+
+    <div class="row g-4">
+        <!-- Left: Video Player & Details (8 Cols) -->
+        <div class="col-lg-8 col-12">
+            <!-- Video Player Box -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-black">
+                <div class="ratio ratio-16x9">
+                    @if (Model.VideoEmbedUrl.Contains("youtube.com/embed"))
+                    {
+                        <iframe src="@Model.VideoEmbedUrl"
+                                title="@Model.CurrentLesson.Title"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen></iframe>
+                    }
+                    else if (Model.VideoEmbedUrl.EndsWith(".mp4") || Model.VideoEmbedUrl.EndsWith(".webm"))
+                    {
+                        <video controls class="w-100 h-100">
+                            <source src="@Model.VideoEmbedUrl" type="video/mp4" />
+                            Your browser does not support the video tag.
+                        </video>
+                    }
+                    else
+                    {
+                        <iframe src="@Model.VideoEmbedUrl"
+                                title="@Model.CurrentLesson.Title"
+                                allowfullscreen></iframe>
+                    }
+                </div>
+            </div>
+
+            <!-- Player Toolbar: Navigation & Mark Completed -->
+            <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                    <!-- Prev Button -->
+                    <div>
+                        @if (Model.PreviousLesson != null)
+                        {
+                            <a asp-action="Watch" asp-route-courseId="@Model.Course.Id" asp-route-lessonId="@Model.PreviousLesson.Id"
+                               class="btn btn-outline-secondary rounded-pill px-3">
+                                <i class="bi-arrow-left me-1"></i> Previous Lesson
+                            </a>
+                        }
+                        else
+                        {
+                            <button class="btn btn-outline-secondary rounded-pill px-3" disabled>
+                                <i class="bi-arrow-left me-1"></i> Previous Lesson
+                            </button>
+                        }
+                    </div>
+
+                    <!-- Secure POST Mark as Completed -->
+                    <div>
+                        <form asp-action="MarkLessonCompleted" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="courseId" value="@Model.Course.Id" />
+                            <input type="hidden" name="lessonId" value="@Model.CurrentLesson.Id" />
+
+                            @if (Model.IsCurrentLessonCompleted)
+                            {
+                                <button type="submit" class="btn btn-success rounded-pill px-4" title="Lesson already completed. Click again to refresh status.">
+                                    <i class="bi-check-circle-fill me-1"></i> Completed
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                                    <i class="bi-check2-circle me-1"></i> Mark as Completed
+                                </button>
+                            }
+                        </form>
+                    </div>
+
+                    <!-- Next Button -->
+                    <div>
+                        @if (Model.NextLesson != null)
+                        {
+                            <a asp-action="Watch" asp-route-courseId="@Model.Course.Id" asp-route-lessonId="@Model.NextLesson.Id"
+                               class="btn btn-outline-secondary rounded-pill px-3">
+                                Next Lesson <i class="bi-arrow-right ms-1"></i>
+                            </a>
+                        }
+                        else
+                        {
+                            <button class="btn btn-outline-secondary rounded-pill px-3" disabled>
+                                Next Lesson <i class="bi-arrow-right ms-1"></i>
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Lesson Info & Course Overview Tabs -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <span class="badge bg-light text-muted border rounded-pill px-3 py-1 mb-2">
+                            <i class="bi-journal-bookmark me-1"></i> Section: @Model.CurrentLesson.Section?.Title
+                        </span>
+                        <h3 class="fw-bold text-dark mb-1">@Model.CurrentLesson.Title</h3>
+                        <p class="text-muted small mb-0">
+                            <i class="bi-clock me-1"></i> Duration: @Model.CurrentLesson.Duration.ToString(@"mm\:ss") mins
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <!-- Tabs for Overview, Instructor, Reviews -->
+                <ul class="nav nav-pills mb-3" id="courseDetailTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active rounded-pill px-4" id="overview-tab" data-bs-toggle="pill" data-bs-target="#overview-content" type="button" role="tab">
+                            Overview
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill px-4" id="instructor-tab" data-bs-toggle="pill" data-bs-target="#instructor-content" type="button" role="tab">
+                            Instructor
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill px-4" id="reviews-tab" data-bs-toggle="pill" data-bs-target="#reviews-content" type="button" role="tab">
+                            Reviews (@Model.Course.Reviews.Count)
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="courseDetailTabsContent">
+                    <!-- Tab 1: Overview -->
+                    <div class="tab-pane fade show active py-3" id="overview-content" role="tabpanel">
+                        <h5 class="fw-bold">About this course</h5>
+                        <p class="text-muted">@Model.Course.Category?.Description</p>
+                        <div class="row g-3 mt-2">
+                            <div class="col-sm-4">
+                                <div class="p-3 bg-light rounded-3 text-center">
+                                    <i class="bi-camera-video fs-4 text-primary mb-1"></i>
+                                    <div class="fw-bold">@Model.Course.Sections.Sum(s => s.Lessons.Count) Lessons</div>
+                                    <small class="text-muted">Total Content</small>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="p-3 bg-light rounded-3 text-center">
+                                    <i class="bi-star fs-4 text-warning mb-1"></i>
+                                    <div class="fw-bold">@Model.Course.AverageRating / 5.0</div>
+                                    <small class="text-muted">Rating</small>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="p-3 bg-light rounded-3 text-center">
+                                    <i class="bi-bar-chart fs-4 text-info mb-1"></i>
+                                    <div class="fw-bold">@Model.Course.Level</div>
+                                    <small class="text-muted">Difficulty Level</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Instructor -->
+                    <div class="tab-pane fade py-3" id="instructor-content" role="tabpanel">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px; font-size: 24px;">
+                                @(Model.Course.Instructor?.User?.FirstName.FirstOrDefault())@(Model.Course.Instructor?.User?.LastName.FirstOrDefault())
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-0">@Model.Course.Instructor?.User?.FirstName @Model.Course.Instructor?.User?.LastName</h5>
+                                <p class="text-muted mb-0 small">@Model.Course.Instructor?.Headline</p>
+                            </div>
+                        </div>
+                        <p class="text-muted">@Model.Course.Instructor?.Bio</p>
+                    </div>
+
+                    <!-- Tab 3: Reviews -->
+                    <div class="tab-pane fade py-3" id="reviews-content" role="tabpanel">
+                        <div id="reviews-section">
+                            <!-- Submit Review Form -->
+                            @if (!Model.HasReviewed)
+                            {
+                                <div class="card border p-4 rounded-4 mb-4 bg-light">
+                                    <h5 class="fw-bold mb-3"><i class="bi-pencil-square me-2"></i> Rate & Review this Course</h5>
+                                    <form asp-action="AddReview" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="courseId" value="@Model.Course.Id" />
+
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Your Rating</label>
+                                            <div class="d-flex gap-3">
+                                                @for (int star = 5; star >= 1; star--)
+                                                {
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="rating" id="star-@star" value="@star" @(star == 5 ? "checked" : "") />
+                                                        <label class="form-check-label" for="star-@star">
+                                                            @star <i class="bi-star-fill text-warning"></i>
+                                                        </label>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="reviewComment" class="form-label fw-bold">Your Feedback</label>
+                                            <textarea class="form-control rounded-3" id="reviewComment" name="comment" rows="3" placeholder="Share your experience with this course..."></textarea>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary rounded-pill px-4">
+                                            Submit Review
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-info rounded-3 mb-4 d-flex align-items-center">
+                                    <i class="bi-info-circle-fill me-2 fs-5"></i>
+                                    <div>
+                                        You have already reviewed this course.
+                                        @if (Model.StudentReview != null)
+                                        {
+                                            <span>
+                                                Your rating:
+                                                @for (int i = 0; i < Model.StudentReview.Rating; i++)
+                                                {
+                                                    <i class="bi-star-fill text-warning"></i>
+                                                }
+                                                <em>"@Model.StudentReview.Comment"</em>
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Existing Reviews List -->
+                            <h5 class="fw-bold mb-3">Student Reviews</h5>
+                            @if (!Model.Course.Reviews.Any())
+                            {
+                                <p class="text-muted">No reviews yet for this course. Be the first to review!</p>
+                            }
+                            else
+                            {
+                                <div class="d-flex flex-column gap-3">
+                                    @foreach (var review in Model.Course.Reviews.OrderByDescending(r => r.CreatedAt))
+                                    {
+                                        <div class="border rounded-3 p-3 bg-white shadow-sm">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <div class="fw-bold">
+                                                    <i class="bi-person-circle me-1 text-primary"></i>
+                                                    @review.Student?.User?.FirstName @review.Student?.User?.LastName
+                                                </div>
+                                                <div class="text-warning">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        if (i <= review.Rating)
+                                                        {
+                                                            <i class="bi-star-fill"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="bi-star"></i>
+                                                        }
+                                                    }
+                                                </div>
+                                            </div>
+                                            <p class="mb-1 text-secondary">@review.Comment</p>
+                                            <small class="text-muted">@review.CreatedAt.ToString("MMM dd, yyyy")</small>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Curriculum Sidebar (4 Cols) -->
+        <div class="col-lg-4 col-12">
+            <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 20px; z-index: 100;">
+                <!-- Header with Progress -->
+                <div class="card-header bg-white border-bottom p-4 rounded-top-4">
+                    <h5 class="fw-bold mb-2">Course Content</h5>
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Overall Progress</span>
+                        <strong>@Model.ProgressPercentage%</strong>
+                    </div>
+                    <div class="progress mb-2" style="height: 8px;">
+                        <div class="progress-bar @(Model.ProgressPercentage >= 100 ? "bg-success" : "bg-primary")"
+                             role="progressbar"
+                             style="width: @Model.ProgressPercentage%;"
+                             aria-valuenow="@Model.ProgressPercentage" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <small class="text-muted">
+                        <i class="bi-check-circle-fill text-success me-1"></i> @Model.CompletedLessonIds.Count of @Model.Course.Sections.Sum(s => s.Lessons.Count) completed
+                    </small>
+                </div>
+
+                <!-- Curriculum Accordion -->
+                <div class="card-body p-0" style="max-height: 65vh; overflow-y: auto;">
+                    <div class="accordion accordion-flush" id="curriculumAccordion">
+                        @foreach (var sec in Model.Course.Sections.OrderBy(s => s.OrderIndex))
+                        {
+                            var isCurrentSection = sec.Lessons.Any(l => l.Id == Model.CurrentLesson.Id);
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading-@sec.Id">
+                                    <button class="accordion-button @(isCurrentSection ? "" : "collapsed") fw-bold py-3"
+                                            type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@sec.Id"
+                                            aria-expanded="@(isCurrentSection ? "true" : "false")"
+                                            aria-controls="collapse-@sec.Id">
+                                        <div class="d-flex flex-column text-start">
+                                            <span>@sec.Title</span>
+                                            <small class="text-muted fw-normal">
+                                                @sec.Lessons.Count(l => Model.CompletedLessonIds.Contains(l.Id)) / @sec.Lessons.Count Lessons
+                                            </small>
+                                        </div>
+                                    </button>
+                                </h2>
+                                <div id="collapse-@sec.Id" class="accordion-collapse collapse @(isCurrentSection ? "show" : "")"
+                                     aria-labelledby="heading-@sec.Id">
+                                    <div class="accordion-body p-0">
+                                        <ul class="list-group list-group-flush">
+                                            @foreach (var lesson in sec.Lessons.OrderBy(l => l.OrderIndex))
+                                            {
+                                                var isCurrent = lesson.Id == Model.CurrentLesson.Id;
+                                                var isCompleted = Model.CompletedLessonIds.Contains(lesson.Id);
+
+                                                <li class="list-group-item list-group-item-action p-3 d-flex align-items-center justify-content-between @(isCurrent ? "bg-light border-start border-primary border-4" : "")">
+                                                    <a asp-action="Watch" asp-route-courseId="@Model.Course.Id" asp-route-lessonId="@lesson.Id"
+                                                       class="text-decoration-none d-flex align-items-center text-truncate flex-grow-1 me-2 @(isCurrent ? "fw-bold text-primary" : "text-dark")">
+                                                        @if (isCompleted)
+                                                        {
+                                                            <i class="bi-check-circle-fill text-success fs-5 me-2 flex-shrink-0" title="Completed"></i>
+                                                        }
+                                                        else if (isCurrent)
+                                                        {
+                                                            <i class="bi-play-circle-fill text-primary fs-5 me-2 flex-shrink-0" title="Playing"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="bi-circle text-muted fs-5 me-2 flex-shrink-0"></i>
+                                                        }
+                                                        <span class="text-truncate">@lesson.Title</span>
+                                                    </a>
+                                                    <span class="badge bg-light text-muted small border">
+                                                        @lesson.Duration.ToString(@"mm\:ss")
+                                                    </span>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
