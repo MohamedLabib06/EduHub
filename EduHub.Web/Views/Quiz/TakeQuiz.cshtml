@@ -1,0 +1,69 @@
+@model EduHub.Web.ViewModels.Quiz.TakeQuizViewModel
+@{
+    ViewData["Title"] = $"Quiz: {Model.QuizTitle}";
+}
+
+<header class="site-header d-flex flex-column justify-content-center align-items-center" style="padding-top: 130px; padding-bottom: 50px;">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a asp-controller="Student" asp-action="MyCourses" class="text-white-50">My Courses</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Student" asp-action="Watch" asp-route-courseId="@Model.CourseId" class="text-white-50">@Model.CourseTitle</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">@Model.QuizTitle</li>
+            </ol>
+        </nav>
+        <h2 class="text-white mb-1">@Model.QuizTitle</h2>
+        <p class="text-white-50 mb-0">
+            Section: @Model.SectionTitle • @Model.Questions.Count Questions • Passing Score: @Model.PassingScore%
+        </p>
+    </div>
+</header>
+
+<section class="section-padding section-bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-12">
+                <form asp-action="SubmitQuiz" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="QuizId" value="@Model.QuizId" />
+
+                    @for (int i = 0; i < Model.Questions.Count; i++)
+                    {
+                        var q = Model.Questions[i];
+                        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge bg-primary rounded-pill px-3">Question @(i + 1) of @Model.Questions.Count</span>
+                                <span class="text-muted small">@q.Points pts</span>
+                            </div>
+
+                            <h5 class="fw-bold mb-3">@q.QuestionText</h5>
+
+                            <div class="d-flex flex-column gap-2">
+                                @foreach (var choice in q.Choices)
+                                {
+                                    <label class="border rounded-3 p-3 d-flex align-items-center gap-3 cursor-pointer">
+                                        <input class="form-check-input mt-0"
+                                               type="radio"
+                                               name="SelectedChoices[@q.QuestionId]"
+                                               value="@choice.ChoiceId"
+                                               required />
+                                        <span>@choice.ChoiceText</span>
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a asp-controller="Student" asp-action="Watch" asp-route-courseId="@Model.CourseId" class="btn btn-outline-secondary rounded-pill px-4">
+                            Back to Course
+                        </a>
+                        <button type="submit" class="btn custom-btn rounded-pill px-5 py-2 fw-bold">
+                            <i class="bi-send-check me-1"></i> Submit Quiz
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

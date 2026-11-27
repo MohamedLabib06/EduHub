@@ -1,0 +1,259 @@
+@model EduHub.Data.Entities.Course
+@using EduHub.Data.Enums
+@{
+    ViewData["Title"] = $"Manage Curriculum - {Model.Title}";
+    var orderedSections = Model.Sections.OrderBy(s => s.OrderIndex).ToList();
+}
+
+<header class="site-header d-flex flex-column justify-content-center align-items-center" style="padding-top: 130px; padding-bottom: 50px;">
+    <div class="container">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-8 col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-2">
+                        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-white-50">Home</a></li>
+                        <li class="breadcrumb-item"><a asp-action="Dashboard" class="text-white-50">Dashboard</a></li>
+                        <li class="breadcrumb-item active text-white" aria-current="page">Manage Curriculum</li>
+                    </ol>
+                </nav>
+                <h2 class="text-white mb-1">@Model.Title</h2>
+                <p class="text-white-50 mb-0">
+                    @Model.Category?.Name • @Model.Level • $@Model.Price.ToString("0.00") •
+                    Status: <span class="badge @(Model.Status == CourseStatus.Published ? "bg-success" : "bg-warning text-dark")">@Model.Status</span>
+                </p>
+            </div>
+            <div class="col-lg-4 col-12 text-lg-end d-flex flex-wrap gap-2 justify-content-lg-end">
+                <form asp-action="UpdateStatus" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="courseId" value="@Model.Id" />
+                    @if (Model.Status == CourseStatus.Published)
+                    {
+                        <input type="hidden" name="status" value="@CourseStatus.Draft" />
+                        <button type="submit" class="btn btn-outline-light rounded-pill px-3">
+                            <i class="bi-eye-slash me-1"></i> Move to Draft
+                        </button>
+                    }
+                    else
+                    {
+                        <input type="hidden" name="status" value="@CourseStatus.Published" />
+                        <button type="submit" class="btn btn-light rounded-pill px-3 fw-bold">
+                            <i class="bi-broadcast me-1"></i> Publish Course
+                        </button>
+                    }
+                </form>
+                <a asp-action="Dashboard" class="btn btn-outline-light rounded-pill px-3">Back</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<section class="section-padding section-bg">
+    <div class="container">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-3 mb-4" role="alert">
+                <i class="bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-3 mb-4" role="alert">
+                <i class="bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <!-- Add Section Form -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-5 bg-white">
+            <h5 class="fw-bold mb-3"><i class="bi-folder-plus me-2 text-primary"></i> Add New Section</h5>
+            <form asp-action="AddSection" method="post" class="row g-3 align-items-end">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="courseId" value="@Model.Id" />
+                <div class="col-md-9">
+                    <label for="sectionTitle" class="form-label fw-semibold">Section Title</label>
+                    <input type="text" class="form-control rounded-3" id="sectionTitle" name="title" placeholder="e.g., Module 1: Getting Started" required maxlength="200" />
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn custom-btn w-100 rounded-pill py-2">
+                        <i class="bi-plus-lg me-1"></i> Add Section
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Existing Sections -->
+        @if (!orderedSections.Any())
+        {
+            <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
+                <i class="bi-collection display-3 text-muted mb-3"></i>
+                <h5>No sections yet</h5>
+                <p class="text-muted mb-0">Start by adding a section above, then add lessons and quizzes inside it.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var sec in orderedSections)
+            {
+                <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
+                    <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge bg-primary rounded-pill me-2">Section @sec.OrderIndex</span>
+                            <h5 class="d-inline fw-bold mb-0">@sec.Title</h5>
+                        </div>
+                        <span class="text-muted small">@sec.Lessons.Count Lessons • @sec.Quizzes.Count Quizzes</span>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <div class="row g-4">
+                            <!-- Lessons Column -->
+                            <div class="col-lg-6 col-12">
+                                <h6 class="fw-bold mb-3"><i class="bi-play-btn me-1 text-primary"></i> Lessons</h6>
+                                @if (sec.Lessons.Any())
+                                {
+                                    <ul class="list-group mb-4">
+                                        @foreach (var lesson in sec.Lessons.OrderBy(l => l.OrderIndex))
+                                        {
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <span class="badge bg-light text-dark border me-2">#@lesson.OrderIndex</span>
+                                                    <span>@lesson.Title</span>
+                                                </div>
+                                                <small class="text-muted">@lesson.Duration.TotalMinutes min</small>
+                                            </li>
+                                        }
+                                    </ul>
+                                }
+                                else
+                                {
+                                    <p class="text-muted small mb-3">No lessons in this section yet.</p>
+                                }
+
+                                <!-- Add Lesson Form -->
+                                <div class="p-3 bg-light rounded-3 border">
+                                    <strong class="d-block mb-2 small">Add Lesson to "@sec.Title"</strong>
+                                    <form asp-action="AddLesson" method="post" class="row g-2">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="courseId" value="@Model.Id" />
+                                        <input type="hidden" name="sectionId" value="@sec.Id" />
+                                        <div class="col-12">
+                                            <input type="text" name="title" class="form-control form-control-sm" placeholder="Lesson title" required maxlength="200" />
+                                        </div>
+                                        <div class="col-8">
+                                            <input type="url" name="videoUrl" class="form-control form-control-sm" placeholder="YouTube or video URL (https://...)" required maxlength="500" />
+                                        </div>
+                                        <div class="col-4">
+                                            <input type="number" name="durationMinutes" class="form-control form-control-sm" placeholder="Mins" min="1" value="10" required />
+                                        </div>
+                                        <div class="col-12">
+                                            <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3">
+                                                <i class="bi-plus me-1"></i> Add Lesson
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Quizzes Column -->
+                            <div class="col-lg-6 col-12">
+                                <h6 class="fw-bold mb-3"><i class="bi-patch-question me-1 text-warning"></i> Quizzes</h6>
+                                @if (sec.Quizzes.Any())
+                                {
+                                    @foreach (var quiz in sec.Quizzes)
+                                    {
+                                        <div class="border rounded-3 p-3 mb-3 bg-light">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <strong>@quiz.Title</strong>
+                                                <span class="badge bg-warning text-dark">Passing: @quiz.PassingScore%</span>
+                                            </div>
+
+                                            @if (quiz.Questions.Any())
+                                            {
+                                                <ul class="list-group list-group-flush mb-3 rounded-2 overflow-hidden">
+                                                    @foreach (var qn in quiz.Questions)
+                                                    {
+                                                        <li class="list-group-item small">
+                                                            <div class="fw-semibold">@qn.QuestionText (@qn.Points pts)</div>
+                                                            <div class="text-muted">
+                                                                @foreach (var ch in qn.Choices)
+                                                                {
+                                                                    <span class="me-2 @(ch.IsCorrect ? "text-success fw-bold" : "")">
+                                                                        @(ch.IsCorrect ? "✓" : "•") @ch.ChoiceText
+                                                                    </span>
+                                                                }
+                                                            </div>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            }
+                                            else
+                                            {
+                                                <p class="text-muted small mb-2">No questions added yet.</p>
+                                            }
+
+                                            <!-- Add Question Form -->
+                                            <form asp-action="AddQuestion" method="post" class="border-top pt-2 mt-2">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="courseId" value="@Model.Id" />
+                                                <input type="hidden" name="quizId" value="@quiz.Id" />
+                                                <div class="row g-2 mb-2">
+                                                    <div class="col-9">
+                                                        <input type="text" name="questionText" class="form-control form-control-sm" placeholder="New question text..." required maxlength="1000" />
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <input type="number" name="points" class="form-control form-control-sm" value="1" min="1" title="Points" required />
+                                                    </div>
+                                                </div>
+                                                <div class="row g-2 mb-2">
+                                                    @for (int c = 0; c < 4; c++)
+                                                    {
+                                                        <div class="col-6">
+                                                            <div class="input-group input-group-sm">
+                                                                <div class="input-group-text">
+                                                                    <input class="form-check-input mt-0" type="radio" name="correctIndex" value="@c" @(c == 0 ? "checked" : "") title="Mark as correct answer" />
+                                                                </div>
+                                                                <input type="text" name="choiceTexts" class="form-control" placeholder="Choice @(c + 1) @(c < 2 ? "*" : "(opt)")" @(c < 2 ? "required" : "") maxlength="500" />
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <button type="submit" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+                                                    <i class="bi-plus-circle me-1"></i> Add Question
+                                                </button>
+                                            </form>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <p class="text-muted small mb-3">No quizzes in this section yet.</p>
+                                }
+
+                                <!-- Add Quiz Form -->
+                                <div class="p-3 bg-light rounded-3 border">
+                                    <strong class="d-block mb-2 small">Add Quiz to "@sec.Title"</strong>
+                                    <form asp-action="AddQuiz" method="post" class="row g-2">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="courseId" value="@Model.Id" />
+                                        <input type="hidden" name="sectionId" value="@sec.Id" />
+                                        <div class="col-8">
+                                            <input type="text" name="title" class="form-control form-control-sm" placeholder="Quiz title" required maxlength="200" />
+                                        </div>
+                                        <div class="col-4">
+                                            <input type="number" name="passingScore" class="form-control form-control-sm" placeholder="Pass %" min="0" max="100" value="60" required />
+                                        </div>
+                                        <div class="col-12">
+                                            <button type="submit" class="btn btn-warning btn-sm rounded-pill px-3">
+                                                <i class="bi-plus me-1"></i> Add Quiz
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</section>
