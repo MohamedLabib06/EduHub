@@ -1,0 +1,239 @@
+@using EduHub.Data.Entities
+@model Course
+@{
+    ViewData["Title"] = Model.Title;
+
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var isStudent = User.IsInRole("Student");
+
+    var instructorName = $"{Model.Instructor?.User?.FirstName} {Model.Instructor?.User?.LastName}".Trim();
+    if (string.IsNullOrWhiteSpace(instructorName))
+    {
+        instructorName = "EduHub Instructor";
+    }
+
+    var sections = Model.Sections.OrderBy(s => s.OrderIndex).ToList();
+    var reviews = Model.Reviews.OrderByDescending(r => r.CreatedAt).ToList();
+
+    string CourseImage(string categoryName) => categoryName?.ToLowerInvariant() switch
+    {
+        "web design" => "~/images/topics/undraw_Redesign_feedback_re_jvm0.png",
+        "backend & api" => "~/images/topics/undraw_Remote_design_team_re_urdx.png",
+        "marketing" => "~/images/topics/undraw_viral_tweet_gndb.png",
+        "finance" => "~/images/topics/undraw_Finance_re_gnv2.png",
+        _ => "~/images/topics/undraw_Educator_re_ju47.png"
+    };
+}
+
+<section class="section-padding">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7 col-12 mb-4 mb-lg-0">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-3">
+                        <li class="breadcrumb-item"><a asp-controller="Courses" asp-action="Index">Courses</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">@Model.Title</li>
+                    </ol>
+                </nav>
+
+                <span class="badge bg-education rounded-pill mb-3">@Model.Category.Name</span>
+                <h1 class="mb-3">@Model.Title</h1>
+
+                <p class="mb-2">
+                    <i class="bi bi-person-badge me-2"></i>
+                    <strong>Instructor:</strong> @instructorName
+                </p>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Instructor?.Headline))
+                {
+                    <p class="text-muted mb-2">@Model.Instructor.Headline</p>
+                }
+
+                <p class="mb-2">
+                    <i class="bi bi-signal me-2"></i>
+                    <strong>Level:</strong> @Model.Level
+                </p>
+
+                <p class="mb-2">
+                    <i class="bi bi-star-fill text-warning me-2"></i>
+                    <strong>Rating:</strong> @Model.AverageRating.ToString("0.0")
+                    <span class="text-muted">(@Model.Reviews.Count review(s))</span>
+                </p>
+
+                <h3 class="mt-4 mb-3">@($"${Model.Price:N2}")</h3>
+
+                <div class="mt-4">
+                    @if (!isAuthenticated)
+                    {
+                        <a asp-controller="Account"
+                           asp-action="Login"
+                           asp-route-returnUrl="@Context.Request.Path.Value"
+                           class="btn custom-btn">
+                            Log in to enroll
+                        </a>
+                        <p class="text-muted mt-2 mb-0">You can browse all published courses without an account.</p>
+                    }
+                    else if (!isStudent)
+                    {
+                        <div class="alert alert-info mb-0">
+                            Only student accounts can enroll in courses.
+                        </div>
+                    }
+                    else
+                    {
+                        <form asp-controller="Student" asp-action="Enroll" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="courseId" value="@Model.Id" />
+                            <button type="submit" class="btn custom-btn">Enroll now</button>
+                        </form>
+                        <p class="text-muted mt-2 mb-0">
+                            Enrollment is handled by the Student Learning Flow.
+                        </p>
+                    }
+                </div>
+            </div>
+
+            <div class="col-lg-5 col-12">
+                <div class="topics-detail-block shadow-lg">
+                    <img src="@CourseImage(Model.Category.Name)"
+                         class="topics-detail-block-image img-fluid"
+                         alt="@Model.Title" />
+                </div>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Instructor?.Bio))
+        {
+            <div class="row mt-5">
+                <div class="col-12">
+                    <blockquote>
+                        <small class="d-block text-muted mb-2">About the instructor</small>
+                        @Model.Instructor.Bio
+                    </blockquote>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="section-padding bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h2 class="mb-4">Course Curriculum</h2>
+
+                @if (!sections.Any())
+                {
+                    <div class="alert alert-info mb-0">
+                        No sections have been added to this course yet.
+                    </div>
+                }
+                else
+                {
+                    <div class="accordion" id="curriculumAccordion">
+                        @for (var sectionNumber = 0; sectionNumber < sections.Count; sectionNumber++)
+                        {
+                            var courseSection = sections[sectionNumber];
+                            var displayNumber = sectionNumber + 1;
+                            var sectionCollapseId = $"section-collapse-{displayNumber}";
+                            var sectionHeadingId = $"section-heading-{displayNumber}";
+                            var isFirst = sectionNumber == 0;
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="@sectionHeadingId">
+                                    <button class="accordion-button @(isFirst ? string.Empty : "collapsed")"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#@sectionCollapseId"
+                                            aria-expanded="@(isFirst ? "true" : "false")"
+                                            aria-controls="@sectionCollapseId">
+                                        <span>@courseSection.Title</span>
+                                        <span class="ms-auto small text-muted">@courseSection.Lessons.Count lesson(s)</span>
+                                    </button>
+                                </h2>
+
+                                <div id="@sectionCollapseId"
+                                     class="accordion-collapse collapse @(isFirst ? "show" : string.Empty)"
+                                     aria-labelledby="@sectionHeadingId"
+                                     data-bs-parent="#curriculumAccordion">
+                                    <div class="accordion-body">
+                                        @if (!courseSection.Lessons.Any())
+                                        {
+                                            <p class="text-muted mb-0">No lessons have been added to this section yet.</p>
+                                        }
+                                        else
+                                        {
+                                            <ul class="list-unstyled mb-0">
+                                                @foreach (var lesson in courseSection.Lessons.OrderBy(l => l.OrderIndex))
+                                                {
+                                                    <li class="d-flex justify-content-between align-items-center border-bottom py-2">
+                                                        <span>
+                                                            <i class="bi bi-play-circle me-2"></i>@lesson.Title
+                                                        </span>
+                                                        <span class="text-muted small">@lesson.Duration</span>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-padding">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h2 class="mb-4">Student Reviews</h2>
+
+                @if (!reviews.Any())
+                {
+                    <div class="alert alert-info mb-0">
+                        No reviews yet. Be the first student to share your experience.
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        @foreach (var review in reviews)
+                        {
+                            var reviewerName = $"{review.Student?.User?.FirstName} {review.Student?.User?.LastName}".Trim();
+                            if (string.IsNullOrWhiteSpace(reviewerName))
+                            {
+                                reviewerName = "EduHub Student";
+                            }
+
+                            <div class="col-lg-6 col-12 mb-4">
+                                <div class="card h-100 shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h5 class="card-title mb-0">@reviewerName</h5>
+                                            <span class="text-muted small">@review.CreatedAt.ToString("dd MMM yyyy")</span>
+                                        </div>
+
+                                        <div class="mb-2" aria-label="@review.Rating out of 5 stars">
+                                            @for (var star = 0; star < review.Rating; star++)
+                                            {
+                                                <i class="bi bi-star-fill text-warning"></i>
+                                            }
+                                        </div>
+
+                                        <p class="card-text mb-0">
+                                            @(string.IsNullOrWhiteSpace(review.Comment) ? "No written comment." : review.Comment)
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

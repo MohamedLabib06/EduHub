@@ -1,0 +1,104 @@
+@using EduHub.Data.Enums
+@using EduHub.Web.ViewModels.Courses
+@model CourseCatalogViewModel
+@{
+    ViewData["Title"] = "Courses";
+
+    string CourseImage(string categoryName) => categoryName?.ToLowerInvariant() switch
+    {
+        "web design" => "~/images/topics/undraw_Redesign_feedback_re_jvm0.png",
+        "backend & api" => "~/images/topics/undraw_Remote_design_team_re_urdx.png",
+        "marketing" => "~/images/topics/undraw_viral_tweet_gndb.png",
+        "finance" => "~/images/topics/undraw_Finance_re_gnv2.png",
+        _ => "~/images/topics/undraw_Educator_re_ju47.png"
+    };
+}
+
+<section class="section-padding">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2>Course Catalog</h2>
+                <p class="text-muted">Browse published courses and filter them to find the right one for you.</p>
+            </div>
+        </div>
+
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-10 col-12">
+                <form asp-controller="Courses" asp-action="Index" method="get" class="row g-3 align-items-end">
+                    <div class="col-md-4 col-12">
+                        <label asp-for="Search" class="form-label">Search</label>
+                        <input asp-for="Search" class="form-control" placeholder="Search by title or category" />
+                    </div>
+
+                    <div class="col-md-3 col-12">
+                        <label asp-for="CategoryId" class="form-label">Category</label>
+                        <select asp-for="CategoryId" class="form-select">
+                            <option value="">All categories</option>
+                            @foreach (var category in Model.Categories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 col-12">
+                        <label asp-for="Level" class="form-label">Level</label>
+                        <select asp-for="Level" class="form-select" asp-items="Html.GetEnumSelectList<CourseLevel>()">
+                            <option value="">All levels</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 col-12 d-grid">
+                        <button type="submit" class="btn custom-btn">Apply</button>
+                    </div>
+
+                    <div class="col-12">
+                        <a asp-controller="Courses" asp-action="Index" class="btn btn-link p-0">Clear filters</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="row">
+            @if (!Model.Courses.Any())
+            {
+                <div class="col-12 text-center py-5">
+                    <h5>No courses matched your filters.</h5>
+                    <p class="text-muted">Try a different search term or clear the filters.</p>
+                    <a asp-controller="Courses" asp-action="Index" class="btn custom-btn mt-3">View all courses</a>
+                </div>
+            }
+            else
+            {
+                @foreach (var course in Model.Courses)
+                {
+                    var instructorName = $"{course.Instructor?.User?.FirstName} {course.Instructor?.User?.LastName}".Trim();
+                    if (string.IsNullOrWhiteSpace(instructorName))
+                    {
+                        instructorName = "EduHub Instructor";
+                    }
+
+                    <div class="col-lg-4 col-md-6 col-12 mb-4">
+                        <div class="custom-block bg-white shadow-lg">
+                            <a asp-controller="Courses" asp-action="Details" asp-route-id="@course.Id">
+                                <div class="d-flex">
+                                    <div>
+                                        <h5 class="mb-2">@course.Title</h5>
+                                        <p class="mb-1 small">By @instructorName</p>
+                                        <p class="mb-0 small text-muted">
+                                            @course.Category.Name &bull; @course.Level &bull; <i class="bi bi-star-fill text-warning"></i> @course.AverageRating.ToString("0.0")
+                                        </p>
+                                    </div>
+                                    <span class="badge bg-design rounded-pill ms-auto">@($"${course.Price:N2}")</span>
+                                </div>
+
+                                <img src="@CourseImage(course.Category.Name)" class="custom-block-image img-fluid" alt="@course.Title" />
+                            </a>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</section>
